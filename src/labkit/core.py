@@ -27,6 +27,7 @@ class LabInfo:
     where: str = "browser"      # "browser": also runs on the labs site. "terminal": needs a real environment.
     packages: list = field(default_factory=list)   # third-party packages the lab imports
     standins: list = field(default_factory=list)   # tools the labs site replaces with a practice version
+    support: list = field(default_factory=list)    # files the lab ships and reads, which the member does not edit
     group: str = ""             # the dependency group that installs them: uv sync --group <group>
     timeout: int = TIMEOUT_SECONDS
 
@@ -57,6 +58,7 @@ def load(folder: Path) -> LabInfo:
         where=data.get("where", "browser"),
         packages=list(data.get("packages", [])),
         standins=list(data.get("standins", [])),
+        support=list(data.get("support", [])),
         group=data.get("group", ""),
         timeout=int(data.get("timeout", TIMEOUT_SECONDS)),
     )

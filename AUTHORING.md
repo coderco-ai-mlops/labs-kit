@@ -49,11 +49,19 @@ Members do labs on the labs site, where Python runs inside the browser. Every la
 
 A lab gets its tools in one of two ways.
 
-**A real package.** List it in `packages`. The site installs it when the lab opens. Known to work: `numpy`, `pandas`, `scikit-learn`, `joblib`, `fastapi`, `pydantic`, `httpx`, `openai`, `langfuse`, `great-expectations`, `duckdb`, `pyyaml`, `pytest`. Prefer this whenever it works.
+**A real package.** List it in `packages`. The site installs it when the lab opens. Known to work: `numpy`, `pandas`, `scipy`, `scikit-learn`, `joblib`, `fastapi`, `pydantic`, `httpx`, `openai`, `langfuse`, `great-expectations`, `duckdb`, `pyyaml`, `pyarrow`, `pytest`, `prometheus-client`, `mlflow-skinny` (with `sqlalchemy` and `alembic`, on a SQLite store). Prefer this whenever it works.
 
-**A practice version.** Some tools cannot be installed in a browser: PyTorch, TensorFlow, Airflow, dbt, Chroma, LangChain, LangGraph. For those there is a small stand-in under `labs-kit/src/labkit/standins/`, listed in the lab's `standins`. It behaves the same as the real tool for everything the lab uses, and says so plainly when a member reaches for something it does not include. See `standins/README.md`.
+**A practice version.** Some tools cannot be installed in a browser: PyTorch, TensorFlow, Airflow, dbt, Chroma, LangChain, LangGraph, Feast, Evidently, BentoML. For those there is a small stand-in under `labs-kit/src/labkit/standins/`, listed in the lab's `standins`. It behaves the same as the real tool for everything the lab uses, and says so plainly when a member reaches for something it does not include. See `standins/README.md`.
 
 What the browser cannot do: open network connections, start a server, use threads or subprocesses. So an API lab calls its app through `labkit.web.call(app, "GET", "/health")` in place of a running server, and a model lab passes in a `FakeLLM`.
+
+Things with no Python tool to run, such as a `docker-compose.yml`, a GitHub Actions workflow or a Grafana dashboard, are configuration files the member edits and the checks parse strictly. List them in `files`.
+
+A lab can also ship files the member does not edit. Small data and config files (`.csv`, `.json`, `.txt`, `.yml`, `.yaml`, `.toml`, `.sql`) in the lab folder travel to the site automatically. Name anything else, such as a helper module, in `support = ["helper.py"]`. Binary files do not travel: create them in code.
+
+On the site, a lab that needs a library the current Python does not have gets a fresh Python, so a lab never depends on what was opened before it.
+
+Each module is its own repo (`python-labs`, `mlops-labs`) with its solutions under `labs-solutions/<module>/`. For a module other than Python, pass `--module=mlops` to the browser check.
 
 `where = "terminal"` still exists for a lab that truly cannot run on the site. No Python lab needs it today. Do not use it without proving the two routes above cannot work.
 
