@@ -1,7 +1,8 @@
 """A practice version of Apache Airflow for the labs site, where the real Airflow cannot be installed.
 
-It covers what lab s3-08 uses: a DAG with its settings, PythonOperator tasks, and the links between
-tasks made with >> and <<. It does not schedule anything. On your own machine the real Airflow is used.
+It covers what labs s3-08 and m11 use: a DAG with its settings, PythonOperator tasks, the links between
+tasks made with >> and <<, and AirflowSkipException for a task that decides there is nothing to do.
+It does not schedule anything. On your own machine the real Airflow is used.
 """
 
 import importlib.abc

@@ -14,6 +14,14 @@ class AirflowException(Exception):
     pass
 
 
+class AirflowSkipException(AirflowException):
+    """Raise this inside a task to skip it. The tasks after it are skipped too."""
+
+
+class AirflowFailException(AirflowException):
+    """Raise this inside a task to fail it without any retries."""
+
+
 class DuplicateTaskIdFound(AirflowException):
     pass
 
