@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 240" role="img" aria-label="CoderCo AI and MLOps labs">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="0%" r="75%">
+      <stop offset="0" stop-color="#EB6B47" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#EB6B47" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="240" rx="14" fill="#0F0F0F"/>
+  <rect width="1200" height="240" rx="14" fill="url(#glow)"/>
+  <text x="64" y="92" fill="#F5F1EB" fill-opacity=".66" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" letter-spacing="2.5">CODERCO AI &amp; MLOPS</text>
+  <text x="64" y="160" fill="#F5F1EB" font-family="Fraunces, Georgia, 'Times New Roman', serif" font-size="64" font-weight="500" letter-spacing="-1.2">Hands-on <tspan fill="#EB6B47">labs.</tspan></text>
+  <text x="64" y="198" fill="#F5F1EB" fill-opacity=".84" font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="21">Build it, break it, check it. One command tells you when you are done.</text>
+</svg>
