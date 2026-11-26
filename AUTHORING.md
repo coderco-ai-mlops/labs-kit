@@ -75,6 +75,33 @@ cd python-labs && LAB_STANDINS=1 uv run lab verify --solutions ../labs-solutions
 
 On the task card, never tell a member that something cannot run in a web page. If a lab uses a practice version, say so in one short paragraph at the end of "Build it", and put the real-tool route in "Go further".
 
+## Linux labs (Engineering Foundations)
+
+A lab with `where = "linux"` runs on a real Linux machine in the member's browser: Alpine Linux 3.21 (32-bit), run by the v86 emulator, with a terminal on the right of the page. The member is `learner` (home `/home/learner`, passwordless `sudo`) and starts in `~/lab`. There is no network to the internet inside the machine; everything a lab needs is already installed. See `labs-platform/linux/Dockerfile` for the full package list. It includes bash, coreutils, findutils, grep, sed, gawk, procps, psmisc, shadow, sudo, nano, vim, tree, less, tar, gzip, zip, git, curl, wget, jq, yq, sqlite, redis, Postgres 16, python3 with PyYAML, openssh-client, openssl, iproute2, iputils, bind-tools, netcat, nginx, dnsmasq and iptables.
+
+A Linux lab folder:
+
+```
+labs/ef3-02-permissions/
+  README.md     the task card. Commands are typed in the terminal, so write them as the member types them.
+  lab.toml      where = "linux"; files = the files the member edits (may be empty)
+  setup.sh      optional, runs as root before the member starts. $LAB_DIR is /home/learner/lab.
+  checks.py     runs as root on the same machine, after the member presses Check
+  hints.md      three hints
+  ...           any other text files: copied into ~/lab as they are
+  .starter/     a copy of the files listed in `files`
+```
+
+The solution goes in `labs-solutions/foundations/<folder>/`: edited files under their names, plus `solution.sh`, which is run as `learner` from `~/lab` and does what a member would type. Both are optional, but at least one must exist.
+
+Checks use `labkit.shell` (read `labs-kit/src/labkit/shell.py`): `sh(cmd)` runs a command as the member and returns `.code`, `.out`, `.err`, `.lines`; `need_file`, `need_dir`, `read`, `mode` (for example `"750"`), `owner`, `group`, `user_exists`, `groups_of`, `processes`, `running`, `git(args, cwd)`. Check outcomes on the machine, not what the member typed. `~/.bash_history` is written after every command, but use it only when the lesson is the command itself.
+
+The member's whole home folder is saved to their account and comes back next visit. Anything outside it (users added, services started, files in `/etc`) starts fresh each visit, so a lab must be finishable in one sitting, or keep its state under `/home/learner`. `setup.sh` should make everything the lab needs outside the home folder.
+
+Prove a Linux lab with `cd labs-platform && python3 build.py && node tools/linux-check.mjs <lab id>`. It boots the same machine members get, checks the untouched starter (some checks must fail), applies the solution and checks again (all must pass). Then try two wrong answers a member would give, by hand, with a small script of your own that uses `site/linuxlab.mjs`, and read the messages.
+
+On a Linux lab card, "Before you start" says the terminal on the right is a real Linux machine. "Check" says "Press Check." Do not mention `uv` or `lab check`.
+
 ## The task card (README.md)
 
 Copy the shape of `s1-08-if-statements/README.md` exactly: same headings, same order.
