@@ -69,20 +69,28 @@ class Model:
         return f'Model(tag="{self.tag}")'
 
 
-STORE: dict = {}   # model name -> its saved versions, oldest first. Kept in memory for the visit.
+STORES: dict = {}   # store folder -> {model name -> its saved versions, oldest first}. Kept in memory for the visit.
+
+
+def store() -> dict:
+    """The model store in use. As in the real BentoML, the BENTOML_HOME setting names the store's folder,
+    and without it the store is the folder called bentoml in the home folder. Each folder is its own store,
+    so a lab that names a folder of its own never sees a model that was saved somewhere else."""
+    home = os.environ.get("BENTOML_HOME") or os.path.join(os.path.expanduser("~"), "bentoml")
+    return STORES.setdefault(home, {})
 
 
 def save(name, model) -> Model:
     tag = Tag.from_taglike(name)
     version = tag.version or base64.b32encode(os.urandom(10)).decode("ascii").lower()
     saved = Model(Tag(tag.name, version), pickle.dumps(model))
-    STORE.setdefault(tag.name, []).append(saved)
+    store().setdefault(tag.name, []).append(saved)
     return saved
 
 
 def get(tag) -> Model:
     tag = Tag.from_taglike(tag)
-    versions = STORE.get(tag.name, [])
+    versions = store().get(tag.name, [])
     if not versions:
         raise NotFound(f"no Models with name '{tag.name}' exist in BentoML store")
     if tag.version in (None, "latest"):
@@ -94,7 +102,7 @@ def get(tag) -> Model:
 
 
 def every() -> list:
-    return [saved for versions in STORE.values() for saved in versions]
+    return [saved for versions in store().values() for saved in versions]
 
 
 def load(bento_model):
