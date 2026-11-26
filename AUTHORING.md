@@ -100,6 +100,7 @@ The member's whole home folder is saved to their account and comes back next vis
 
 - `setup.sh` runs on every visit, before the saved home folder is restored. It must make everything the lab needs outside the home folder, and must be safe to run again.
 - `$RANDOM` in `setup.sh` is seeded per member and lab, and `$LAB_SEED` holds the seed, so random values are the same on every visit. Seed any other random source from `$LAB_SEED` (in Python: `random.Random(int(os.environ["LAB_SEED"]))`). Do not use `shuf` or `/dev/urandom` for anything a check depends on.
+- On a return visit, `$LAB_SAVED_HOME` is the path of the member's saved home folder as a `.tar.gz` (paths start `learner/`), unpacked over the fresh home folder after `setup.sh` finishes. It is empty on a first visit. Use it to skip building something the member already has, for example `tar tzf "$LAB_SAVED_HOME" | grep -q '^learner/project/'`.
 - `setup.sh` runs with `set -e`. If it fails, the lab does not open and the member sees the error, so test it on a second run as well.
 - Services a member starts (nginx, redis, postgres) are gone on the next visit. If a check needs one running, the check's message should say to start it again.
 
