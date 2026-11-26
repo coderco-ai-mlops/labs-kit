@@ -103,6 +103,18 @@ The member's whole home folder is saved to their account and comes back next vis
 - `setup.sh` runs with `set -e`. If it fails, the lab does not open and the member sees the error, so test it on a second run as well.
 - Services a member starts (nginx, redis, postgres) are gone on the next visit. If a check needs one running, the check's message should say to start it again.
 
+**Tools on the machine (and what to know about them):**
+
+- **Databases:** Postgres 16 is initialised (trust auth, user `postgres`). `sudo rc-service postgresql start` takes about 2 seconds. Redis starts with `redis-server --daemonize yes` or `sudo rc-service redis start`. SQLite is there too.
+- **Web and network:** nginx (`sudo rc-service nginx start`), dnsmasq, iptables, `ss`, `lsof`, `fuser`, `dig`, `curl`, `nc`, openssl. Generate EC keys (`openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 ...`): a 2048-bit RSA key takes about 25 seconds on this machine.
+- **Terraform:** `terraform` runs OpenTofu 1.8 (the open-source fork, same commands and language; say so once on the card). There is no internet, so only these providers work, from a local mirror: `hashicorp/local` 2.5.2, `hashicorp/random` 3.6.3, `hashicorp/null` 3.2.3, `hashicorp/tls` 4.0.6, plus the built-in `terraform_data`. The S3 backend works against the practice cloud. There is no AWS provider; real-AWS Terraform goes in "Go further".
+- **The practice cloud:** set `machine = "cloud"` in `lab.toml`. The lab then starts with moto (an AWS emulator) on `localhost:4566` and a warm AWS CLI, so `aws` commands take about 3 seconds. `~/.aws/config` points the AWS CLI at it (`endpoint_url = http://localhost:4566`, region `eu-west-2`, keys `test`), so members type plain `aws s3 ls`. Services known to work: S3, IAM, STS, EC2 (instances, VPCs, subnets, security groups), SQS, SNS, Secrets Manager, SSM, DynamoDB, Lambda, CloudWatch, Logs, KMS, Budgets. Everything starts empty each visit; build what the lab needs in `setup.sh`. Python code can use boto3 with `endpoint_url="http://localhost:4566"`. Do not use the cloud machine for labs that do not need it: it is a larger download.
+- **Monitoring:** Prometheus (`promtool check config`, `promtool test rules` for alert unit tests) and Alertmanager (`amtool`), and the Python `prometheus_client`. There is no Grafana: a Grafana dashboard is a JSON file the checks parse.
+- **Code quality:** pytest, ruff, flake8, yamllint, make. No shellcheck, gitleaks, hadolint, Docker or `act`.
+- **Kubernetes tools:** kubectl (client only, no cluster), Helm (`helm template`, `helm lint`), kustomize (`kustomize build`).
+- **Speed:** Python takes about 1 second to start, so a check that runs a member's Python file 10 times takes 10 seconds. Keep a whole Check under 30 seconds.
+- **Shared helpers:** a tool several labs use (for example a practice CI runner) lives once in `foundations-labs/tools/`. Each lab that needs it has a symbolic link to it in its folder, and its `setup.sh` installs it.
+
 The machine has loopback up and `localhost` in `/etc/hosts`, and `crond` runs. A command on the control line, including the whole of Check, is stopped after 120 seconds. `sh()` gives commands empty input; pass `stdin=` when a command needs some. `mode()` includes special bits as a fourth digit (the home folder is `2700`, because it is setgid).
 
 Prove a Linux lab with `cd labs-platform && python3 build.py && node tools/linux-check.mjs <lab id>`. It boots the same machine members get, checks the untouched starter (some checks must fail), applies the solution and checks again (all must pass). Then try two wrong answers a member would give, by hand, with a small script of your own that uses `site/linuxlab.mjs`, and read the messages.
