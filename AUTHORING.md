@@ -96,7 +96,14 @@ The solution goes in `labs-solutions/foundations/<folder>/`: edited files under 
 
 Checks use `labkit.shell` (read `labs-kit/src/labkit/shell.py`): `sh(cmd)` runs a command as the member and returns `.code`, `.out`, `.err`, `.lines`; `need_file`, `need_dir`, `read`, `mode` (for example `"750"`), `owner`, `group`, `user_exists`, `groups_of`, `processes`, `running`, `git(args, cwd)`. Check outcomes on the machine, not what the member typed. `~/.bash_history` is written after every command, but use it only when the lesson is the command itself.
 
-The member's whole home folder is saved to their account and comes back next visit. Anything outside it (users added, services started, files in `/etc`) starts fresh each visit, so a lab must be finishable in one sitting, or keep its state under `/home/learner`. `setup.sh` should make everything the lab needs outside the home folder.
+The member's whole home folder is saved to their account and comes back next visit. Anything outside it (users added, services started, files in `/etc`) starts fresh each visit. So:
+
+- `setup.sh` runs on every visit, before the saved home folder is restored. It must make everything the lab needs outside the home folder, and must be safe to run again.
+- `$RANDOM` in `setup.sh` is seeded per member and lab, and `$LAB_SEED` holds the seed, so random values are the same on every visit. Seed any other random source from `$LAB_SEED` (in Python: `random.Random(int(os.environ["LAB_SEED"]))`). Do not use `shuf` or `/dev/urandom` for anything a check depends on.
+- `setup.sh` runs with `set -e`. If it fails, the lab does not open and the member sees the error, so test it on a second run as well.
+- Services a member starts (nginx, redis, postgres) are gone on the next visit. If a check needs one running, the check's message should say to start it again.
+
+The machine has loopback up and `localhost` in `/etc/hosts`, and `crond` runs. A command on the control line, including the whole of Check, is stopped after 120 seconds. `sh()` gives commands empty input; pass `stdin=` when a command needs some. `mode()` includes special bits as a fourth digit (the home folder is `2700`, because it is setgid).
 
 Prove a Linux lab with `cd labs-platform && python3 build.py && node tools/linux-check.mjs <lab id>`. It boots the same machine members get, checks the untouched starter (some checks must fail), applies the solution and checks again (all must pass). Then try two wrong answers a member would give, by hand, with a small script of your own that uses `site/linuxlab.mjs`, and read the messages.
 

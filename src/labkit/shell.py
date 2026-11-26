@@ -51,7 +51,7 @@ def sh(command: str, user: str | None = MEMBER, cwd=None, timeout: int = 30, env
         args = ["bash", "-c", command]
     try:
         done = subprocess.run(args, cwd=str(cwd) if cwd else None, capture_output=True, text=True,
-                              timeout=timeout, env=full_env, input=stdin)
+                              timeout=timeout, env=full_env, input=stdin if stdin is not None else "")
     except subprocess.TimeoutExpired:
         raise CheckFail(f"`{command}` did not finish within {timeout} seconds. Look for something that waits for input or never ends.")
     return Ran(done.returncode, done.stdout, done.stderr)
@@ -88,7 +88,7 @@ def read(path) -> str:
 
 
 def mode(path) -> str:
-    """Permission bits as three octal digits, for example '755'."""
+    """Permission bits as octal digits, for example '755'. Special bits show as a fourth digit ('2755' is setgid)."""
     p = _path(path)
     if not p.exists() and not p.is_symlink():
         raise CheckFail(f"`{p}` does not exist.")
